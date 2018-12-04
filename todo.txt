@@ -1,0 +1,27 @@
+506 Final Project
+
+To-do list for 12-5
+1 Reading all document
+2-1 Answer Final Project Preparation Questions
+    https://paper.dropbox.com/doc/SI-506-F18-Final-Project-Prep-Questions-PART-2--ATAPS5cGC5bKo4cMa9o_6jDiAg-vpQkW7ZyCz5Lfdu4T171i
+2-2 create "final_project_preparation.txt" and copy Questions to there
+3-1 create "called SI506F18_project_apis.py"
+3-2 Request to get data from 2 APIs
+3-3 no need to cache
+3-4 include API keys to be run-able
+
+Submit
+1. SI506F18_project_apis.py
+2. final_project_preparation.txt
+
+
+To-do list
+1. 2 check structure
+
+Submit
+
+1. Zip file: "SI506_finalproject.zip"
+2. py file "SI506F18_final_project.py"
+3. "README.txt"
+4. Any SAMPLE output files
+   (Name the sample files something different from the output file/s, so they won’t be overwritten!)
