@@ -1,0 +1,73 @@
+Author: Roy Wang
+Unique Name: falinw
+
+
+Final Project Preparation Questions (PART 2)
+https://paper.dropbox.com/doc/SI-506-F18-Final-Project-Prep-Questions-PART-2--ATAPS5cGC5bKo4cMa9o_6jDiAg-vpQkW7ZyCz5Lfdu4T171i
+
+- Are you using either of the final project guidelines? If so, which one? Tell us in words exactly what your project will do.
+
+  I choose the option 2, which is make use of APIs of Ticketmaster and iTunes.
+
+  - Do you currently plan to make any changes to it?
+
+    No, I do currently plan to make any changes to it.
+
+  - If not, what will your project do, and what data sources will you use?
+
+    My project will focus on searching "concert"
+
+  - Explain what your project will do in words. Don’t just say “option 2”, for example — explain (briefly).
+
+
+- Have you successfully gotten data from the APIs you need?
+  - What, if any, problems are you currently encountering?
+
+
+- Please provide the links to documentation for both APIs, and note whether or not an API key is required for it. (You should have your own API key at this point.)
+
+
+- What will you need to copy in to your project from other sources provided in class?
+  - e.g. for caching, or anything else?
+  - Are you currently aware of any other code sources you may need to cite?
+
+
+- Describe one of your class definition plans by answering each of the following questions:
+  - Your class will be called what?
+  - One instance of your class will represent one what?
+  - The input to the constructor of the class to create a single instance will be what?
+  - What are at least 2 instance variables the class will have? What sort of data values will they contain?
+  - What will the string method from this class return?
+  - What will a method that is NOT the constructor OR a string method do? Will it take any additional input? Will it return anything?
+
+
+- Describe the second one of your class definition plans by answering each of the following questions:
+  - Your class will be called what?
+  - One instance of your class will represent one what?
+  - The input to the constructor of the class to create a single instance will be what?
+  - What are at least 2 instance variables the class will have? What sort of data values will they contain?
+  - What will the string method from this class return?
+  - What will a method that is NOT the constructor OR a string method do? Will it take any additional input? Will it return anything?
+
+
+- What functions will you be defining outside class definitions? You need at least two.  For each, answer the following questions:
+  First function:
+  - What will it be called?
+  - What will its input be?
+  - What do you expect its return value to be?
+
+
+  Second function:
+  - What will it be called?
+  - What will its input be?
+  - What do you expect its return value to be?
+
+You may always have more than 2, but you must describe at least 2 here with these pieces of information.
+
+
+- What file will you be creating?
+  - What information will be in the file? What type of file will it be? What will it look like?
+  - Briefly describe the process of creating the file from the program — what will you need to have completed in the program in order to successfully write the file you are planning to create?
+
+
+- Describe in a sentence or two in what order you plan to tackle writing this code/working on this project. What comes first? Class definitions? Data investigation? What, approximately, is after that? What might come last? This doesn’t have to be exact, nor be exactly what you end up doing, but it should give you a good idea of where you’re going — and give us one, too.

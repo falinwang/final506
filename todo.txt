@@ -1,27 +1,61 @@
 506 Final Project
 
+Timeline
+- 12/5 Submit
+  - "final_project_preparation.txt" and
+  - "SI506F18_project_apis"
+- 12/17 Final Due
+  - "SI506_finalproject.zip"
+    - "SI506F18_final_project.py"
+    - "README.txt"
+    - Any SAMPLE output files (name different from the output files)
+
 To-do list for 12-5
-1 Reading all document
-2-1 Answer Final Project Preparation Questions
-    https://paper.dropbox.com/doc/SI-506-F18-Final-Project-Prep-Questions-PART-2--ATAPS5cGC5bKo4cMa9o_6jDiAg-vpQkW7ZyCz5Lfdu4T171i
-2-2 create "final_project_preparation.txt" and copy Questions to there
-3-1 create "called SI506F18_project_apis.py"
-3-2 Request to get data from 2 APIs
-3-3 no need to cache
-3-4 include API keys to be run-able
+  1 Reading all document
+  2-1 Answer Final Project Preparation Questions
+      https://paper.dropbox.com/doc/SI-506-F18-Final-Project-Prep-Questions-PART-2--ATAPS5cGC5bKo4cMa9o_6jDiAg-vpQkW7ZyCz5Lfdu4T171i
+  2-2 create "final_project_preparation.txt" and copy Questions to there (SI 506 F18 - Final Project Prep Questions (PART 2)
+  )
+  3-1 create "called SI506F18_project_apis.py"
+  3-2 Request to get data from 2 APIs
+  3-3 no need to cache
+  3-4 include API keys to be run-able
 
-Submit
-1. SI506F18_project_apis.py
-2. final_project_preparation.txt
+---
+Option 2 - Events (Ticketmaster, iTunes)
+Note that these are only SUGGESTED GUIDELINES. You can alter these in any way, as long as you fulfill all requirements.
 
 
-To-do list
-1. 2 check structure
+•	Select a category you are interested in searching on Ticketmaster — for example, “music” or “sports” or whatever. (Check out the Ticketmaster documentation/website overall for ideas!)
+o	Ticketmaster Discovery API: https://developer.ticketmaster.com/products-and-docs/apis/discovery-api/v2/
+o	Find your Ticketmaster API key after getting an account on the website, and explore API possibilities: https://developer.ticketmaster.com/api-explorer/
 
-Submit
 
-1. Zip file: "SI506_finalproject.zip"
-2. py file "SI506F18_final_project.py"
-3. "README.txt"
-4. Any SAMPLE output files
-   (Name the sample files something different from the output file/s, so they won’t be overwritten!)
+•	Investigate Ticketmaster data. Use that experience to define a class TicketmasterEvent that fulfills requirements and will be useful as a tool in the rest of the program.
+
+
+•	Investigate iTunes Search API data examples to define a class ITunesMedia that represents one piece of iTunes media (a song, a music video, a movie, could be whatever comes up), which fulfills requirements and will be useful as a tool in the rest of the program.
+
+
+•	Make a search on Ticketmaster (accessing and caching data).
+
+
+•	Using that data, create a list of instances of TicketmasterEvent.
+
+
+•	Each Ticketmaster event probably has a name or a genre (or something else of particular interest).
+o	Create an empty master list to hold ALL iTunes results.
+o	For each one of those Ticketmaster events (each event’s genre, each event’s name… or whatever you pick), make a search on the iTunes Search API with that term.
+o	From the resulting data, create a list of instances of iTunesMedia, and add everything in that list to your master list of iTunes results.
+
+
+•	Iterate over the list of iTunes results, and create a CSV file called event_media.csv with the following columns and corresponding information:
+o	Media name
+o	Artist/creator
+o	Length in seconds or minutes, if applicable
+o	Collection name, if applicable
+o	Any other interesting piece of data that might be available for iTunes media (this may depend on what sort of thing your searches turn up!)
+
+
+Also possible as a nice challenge to make your resulting data more readable:
+o	Sort the items by length or by length of title before writing them to the CSV file
