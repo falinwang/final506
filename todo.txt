@@ -44,17 +44,17 @@ o	Find your Ticketmaster API key after getting an account on the website, and ex
 
 
 •	Each Ticketmaster event probably has a name or a genre (or something else of particular interest).
-o	Create an empty master list to hold ALL iTunes results.
-o	For each one of those Ticketmaster events (each event’s genre, each event’s name… or whatever you pick), make a search on the iTunes Search API with that term.
-o	From the resulting data, create a list of instances of iTunesMedia, and add everything in that list to your master list of iTunes results.
+  o	Create an empty master list to hold ALL iTunes results.
+  o	For each one of those Ticketmaster events (each event’s genre, each event’s name… or whatever you pick), make a search on the iTunes Search API with that term.
+  o	From the resulting data, create a list of instances of iTunesMedia, and add everything in that list to your master list of iTunes results.
 
 
 •	Iterate over the list of iTunes results, and create a CSV file called event_media.csv with the following columns and corresponding information:
-o	Media name
-o	Artist/creator
-o	Length in seconds or minutes, if applicable
-o	Collection name, if applicable
-o	Any other interesting piece of data that might be available for iTunes media (this may depend on what sort of thing your searches turn up!)
+  o	Media name
+  o	Artist/creator
+  o	Length in seconds or minutes, if applicable
+  o	Collection name, if applicable
+  o	Any other interesting piece of data that might be available for iTunes media (this may depend on what sort of thing your searches turn up!)
 
 
 Also possible as a nice challenge to make your resulting data more readable:

@@ -26,6 +26,7 @@ https://paper.dropbox.com/doc/SI-506-F18-Final-Project-Prep-Questions-PART-2--AT
 
 - Please provide the links to documentation for both APIs, and note whether or not an API key is required for it. (You should have your own API key at this point.)
 
+iTunes: https://affiliate.itunes.apple.com/resources/documentation/itunes-store-web-service-search-api/
 
 - What will you need to copy in to your project from other sources provided in class?
   - e.g. for caching, or anything else?
