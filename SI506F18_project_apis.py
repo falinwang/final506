@@ -6,6 +6,7 @@
 # import
 import requests
 import json
+import csv
 
 CACHE_FNAME = 'cache_cache_cache.json'
 
@@ -28,7 +29,6 @@ print("=============== Step 1 =================")
 
 ## Step 1:
 ## Create a class called "TicketmasterEvent" by investigating Ticketmaster data to store the specific data for later use
-
 # The structrue of Ticketmaster API data :
 #   CACHE_DICTION[unique_ident]["_embedded"]["events"][0]
 #   [0]~[4]: each event
@@ -122,28 +122,27 @@ def get_event_data_with_caching(input_postal_code, within_miles = "200"):
 
 # aa_result = get_event_data_with_caching("48104")
 # print(aa_result)
-# print("________________")
 
-
-
-# concert_of_48104 = TicketmasterEvent(get_event_data_with_caching("48104"))
-# print(concert_of_48104.artists)
 
 print("=============== Step 4 =================")
 ## Step 4:
 ## Using that data to create a list of instance of TicketmasterEvent
 
-# ## create a list to keep the search results
-# songs_lst = []
-# for song_diction in search_itunes_songs['results']:
-#     # create a Song instance
-#     inst = Song(song_diction)
-#     # append each Song instance to the list
-#     songs_lst.append(inst)
+instance_list_tm = []
+search_tm_events = get_event_data_with_caching("48104")
+# print(search_tm_events)
+
+for event_diction in search_tm_events["_embedded"]["events"]:
+    instance = TicketmasterEvent(event_diction)
+    instance_list_tm.append(instance.eventname)
+print(instance_list_tm)
+
 
 print("=============== Step 5 =================")
 ## Step 5:
-## Create an empty list to hold ALL iTunes results
+## Create an empty list to hold iTunes results
+
+itunes_results = []
 
 print("=============== Step 6 =================")
 ## Step 6:
@@ -151,14 +150,6 @@ print("=============== Step 6 =================")
 ## ============================
 ## |    iTunes API request    |
 ## ============================
-
-CACHE_FNAME_IT = 'cache_file_itunes.json'
-try:
-    cache_file_itunes = open(CACHE_FNAME_IT, 'r')
-    CACHE_DICTION_IT = json.loads(cache_file_itunes.read())
-    cache_file_itunes.close()
-except:
-    CACHE_DICTION_IT = {}
 
 def get_artist_songs_with_caching(input_artist, how_many_songs = "10"):
     baseurl = "https://itunes.apple.com/search"
@@ -169,16 +160,17 @@ def get_artist_songs_with_caching(input_artist, how_many_songs = "10"):
     diction_parameters["limit"] = how_many_songs
     unique_ident = params_unique_combination(baseurl, diction_parameters)
 
-    if unique_ident in CACHE_DICTION_IT:
-        return CACHE_DICTION_IT[unique_ident]
+    if unique_ident in CACHE_DICTION:
+        return CACHE_DICTION[unique_ident]
     else:
         resp = requests.get(baseurl, params=diction_parameters)
         python_object = json.loads(resp.text)
-        cache_file_object = open(CACHE_FNAME_IT, 'w')
-        CACHE_DICTION_IT[unique_ident] = python_object
-        cache_file_object.write(json.dumps(CACHE_DICTION_IT))
+
+        cache_file_object = open(CACHE_FNAME, 'w')
+        CACHE_DICTION[unique_ident] = python_object
+        cache_file_object.write(json.dumps(CACHE_DICTION))
         cache_file_object.close()
-        return CACHE_DICTION_IT[unique_ident]
+        return CACHE_DICTION[unique_ident]
 
 # ariana = get_artist_songs_with_caching("Ariana")
 # print(ariana)
@@ -188,6 +180,16 @@ print("=============== Step 7 =================")
 ## From the resulting data, create a list of instance of ITunesMedia
 ## Add everything in that list to master list of iTunes results
 
+instance_list_it = []
+result_it_search = get_artist_songs_with_caching("Ariana")
+# print(result_it_search)
+
+for song_diction in result_it_search['results']:
+    instance = ITunesMedia(song_diction)
+    instance_list_it.append(instance.song)
+
+print(len(instance_list_it))
+print(instance_list_it)
 
 print("=============== Step 8 =================")
 ## Step 8:
