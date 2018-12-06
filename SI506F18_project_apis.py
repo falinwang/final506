@@ -64,11 +64,11 @@ print("=============== Step 2 =================")
 
 class ITunesMedia(object):
     def __init__(self, song_diction):
-        self.artists = song_diction["artistName"]
-        self.song = song_diction["trackName"]
-        self.milllength = song_diction["trackTimeMillis"] # To be convert
-        self.collection = song_diction["collectionName"]
-        self.date = song_diction["releaseDate"]
+        self.artists = song_diction["artistName"] # the artist name of the song
+        self.song = song_diction["trackName"] # the name of the song
+        self.milllength = song_diction["trackTimeMillis"] # the length in milliseconds of the song # To be convert
+        self.collection = song_diction["collectionName"] # the collection name of the song
+        self.date = song_diction["releaseDate"] # released date of the song
 
     def normallength(self):
         mins = int(self.length / 1000 / 60)
