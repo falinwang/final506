@@ -3,9 +3,14 @@
 # Final Project Preparation
 # My project will focus on searching recent "concerts" in Detroit area with Ticketmaster and then list the 10 most recent songs of that artists who performance in the concerts with iTunes research API.
 
+# import
 import requests
 import json
 
+CACHE_FNAME = 'cache_cache_cache.json'
+
+
+# params_unique_combination
 def params_unique_combination(baseurl, params_d, private_keys=["apikey"]):
     alphabetized_keys = sorted(params_d.keys())
     res = []
@@ -14,20 +19,82 @@ def params_unique_combination(baseurl, params_d, private_keys=["apikey"]):
             res.append("{}-{}".format(k, params_d[k]))
     return baseurl + "_".join(res)
 
-## ========== Part 1 ==========
-##   Ticketmaster API request
+print("=============== Step 0 =================")
+
+## Step 0:
+## Read the Ticketmaster API documentation and decide what data I want to request
+
+print("=============== Step 1 =================")
+
+## Step 1:
+## Create a class called "TicketmasterEvent" by investigating Ticketmaster data to store the specific data for later use
+
+# The structrue of Ticketmaster API data :
+#   CACHE_DICTION[unique_ident]["_embedded"]["events"][0]
+#   [0]~[4]: each event
+
+class TicketmasterEvent(object):
+    def __init__(self, event_diction):
+        self.artists = [] # because there might be more than 1 artist in a event
+        for artist in event_diction["_embedded"]["attractions"]:
+            self.artists.append(["name"])
+        self.eventname = event_diction["name"]
+        self.date = event_diction["dates"]["start"]["localDate"]
+        self.time = event_diction["dates"]["start"]["localTime"]
+
+    def __str__(self):
+        artists_string_grammar = ""
+        how_many_artists = len(self.artists)
+        if how_many_artists == 1:
+            artists_string_grammar = self.artists
+        elif how_many_artists == 2:
+            artists_string_grammar = self.artists[0] + " and " + self.artists[0]
+        else:
+            for i in self.artists[:how_many_artists-1]:
+                artists_string_grammar = artists_string_grammar + i + ", "
+            artists_string_grammar = artists_string_grammar + ", and " + self.artists[-1]
+        return "{} will performance in {} on {} {}!".format(artists_string_grammar, self.eventname, self.date, self.time)
+
+print("=============== Step 2 =================")
+
+## Step 2:
+## Create a class called "ITunesMedia" that represents one piece of iTunes media, which would be a sond ny investigating iTunes API documentation.
+# The structrue of iTunes API data:
+#   object["results"][0]["artistName"]
+
+class ITunesMedia(object):
+    def __init__(self, song_diction):
+        self.artists = song_diction["artistName"]
+        self.song = song_diction["trackName"]
+        self.milllength = song_diction["trackTimeMillis"] # To be convert
+        self.collection = song_diction["collectionName"]
+        self.date = song_diction["releaseDate"]
+
+    def normallength(self):
+        mins = int(self.length / 1000 / 60)
+        secs = int((self.length / 1000) % 60)
+        return "{}:{}".format(mins, secs)
+
+    def __str__(self):
+        return "Date: {} \n Artist: {} \n Song: {} \n Album: {} \n Length:{} ".format(self.date, self.artists, self.song, self.collection, self.normallength())
+
+print("=============== Step 3 =================")
+
+## Step 3:
+## Make a search on Ticketmaster (accessing and caching data)
+## ============================
+## | Ticketmaster API request |
 ## ============================
 
-print("=============== Part 1 =================")
-
-CACHE_FNAME_TM = 'cache_file_ticketmaster.json'
+# open master cache file and load it into dictionary to prepare for caching
 try:
-    cache_file_ticketmaster = open(CACHE_FNAME_TM, 'r')
-    CACHE_DICTION_TM = json.loads(cache_file_ticketmaster.read())
-    cache_file_ticketmaster.close()
+    cache_file = open(CACHE_FNAME, 'r')
+    CACHE_DICTION = json.loads(cache_file.read())
+    cache_file.close()
 except:
-    CACHE_DICTION_TM = {}
+    CACHE_DICTION = {}
 
+# my API key
 TICKETMASTER_API_KEY = "ANXpHUscAoL1olptTu6QJlhNmiCQ0BQD" # 5000 requests every 1 day
 
 def get_event_data_with_caching(input_postal_code, within_miles = "200"):
@@ -38,41 +105,52 @@ def get_event_data_with_caching(input_postal_code, within_miles = "200"):
     diction_parameters["size"] = "1"
     diction_parameters["postalCode"] = input_postal_code
     diction_parameters["radius"] = within_miles
+
     unique_ident = params_unique_combination(baseurl, diction_parameters)
-    if unique_ident in CACHE_DICTION_TM:
-        return CACHE_DICTION_TM[unique_ident]
+
+    if unique_ident in CACHE_DICTION:
+        return CACHE_DICTION[unique_ident]
     else:
         resp = requests.get(baseurl, params=diction_parameters)
         python_object = json.loads(resp.text)
 
-        cache_file_object = open(CACHE_FNAME_TM, 'w')
-        CACHE_DICTION_TM[unique_ident] = python_object
-        cache_file_object.write(json.dumps(CACHE_DICTION_TM))
+        cache_file_object = open(CACHE_FNAME, 'w')
+        CACHE_DICTION[unique_ident] = python_object
+        cache_file_object.write(json.dumps(CACHE_DICTION))
         cache_file_object.close()
-        return CACHE_DICTION_TM[unique_ident]
+        return CACHE_DICTION[unique_ident]
 
 # aa_result = get_event_data_with_caching("48104")
 # print(aa_result)
 # print("________________")
 
-class TicketmasterEvent(object):
-    def __init__(self, event_diction):
-        self.artists = event_diction["_embedded"]["events"][0]["_embedded"]["attractions"][0]["name"]
-        self.concert = event_diction["_embedded"]["events"][0]["name"]
-        self.date = event_diction["_embedded"]["events"][0]["dates"]["start"]["localDate"]
-        self.address = event_diction["_embedded"]["events"][0]["_embedded"]["venues"][0]["address"]["line1"]
-
-    def __str__(self):
-        return "date includes: {}, address includes: {}, and the artists includes: {}.".format(self.date, self.address,self.artists)
 
 
-concert_of_48104 = TicketmasterEvent(get_event_data_with_caching("48104"))
-print(concert_of_48104.artists)
+# concert_of_48104 = TicketmasterEvent(get_event_data_with_caching("48104"))
+# print(concert_of_48104.artists)
 
-## ========== Part 2 ==========
-##   Ticketmaster API request
+print("=============== Step 4 =================")
+## Step 4:
+## Using that data to create a list of instance of TicketmasterEvent
+
+# ## create a list to keep the search results
+# songs_lst = []
+# for song_diction in search_itunes_songs['results']:
+#     # create a Song instance
+#     inst = Song(song_diction)
+#     # append each Song instance to the list
+#     songs_lst.append(inst)
+
+print("=============== Step 5 =================")
+## Step 5:
+## Create an empty list to hold ALL iTunes results
+
+print("=============== Step 6 =================")
+## Step 6:
+## For each TM event, make a search on the iTunes Search API
 ## ============================
-print("=============== Part 2 =================")
+## |    iTunes API request    |
+## ============================
 
 CACHE_FNAME_IT = 'cache_file_itunes.json'
 try:
@@ -90,7 +168,7 @@ def get_artist_songs_with_caching(input_artist, how_many_songs = "10"):
     diction_parameters["entity"] = "musicTrack"
     diction_parameters["limit"] = how_many_songs
     unique_ident = params_unique_combination(baseurl, diction_parameters)
-    
+
     if unique_ident in CACHE_DICTION_IT:
         return CACHE_DICTION_IT[unique_ident]
     else:
@@ -105,32 +183,13 @@ def get_artist_songs_with_caching(input_artist, how_many_songs = "10"):
 # ariana = get_artist_songs_with_caching("Ariana")
 # print(ariana)
 
-
-class ITunesMedia(object):
-    """ iTunes: https://affiliate.itunes.apple.com/resources/documentation/itunes-store-web-service-search-api/ """
-    def __init__(self, songs_diction):
-        self.artists = []
-        for track in songs_diction["results"]:
-            self.artists.append(track["artistName"])
-
-    def __str__(self):
-        return "This is about {}".format(self.artists)
+print("=============== Step 7 =================")
+## Step 7:
+## From the resulting data, create a list of instance of ITunesMedia
+## Add everything in that list to master list of iTunes results
 
 
-tm_cache = open("cache_file_ticketmaster.json")
-tm_diction = json.loads(tm_cache.read())
-tm_cache.close()
-tm = TicketmasterEvent(tm_diction[list(tm_diction.keys())[0]])
-
-print("who?", tm.artists)
-# print(get_artist_songs_with_caching(tm.artists))
-
-
-it_cache = open("cache_file_itunes.json")
-it_diction = json.loads(it_cache.read())
-it_cache.close()
-print(ITunesMedia(it_diction[list(it_diction.keys())[1]]))
-
-
-
-# TODO: (1) the songs should be sorted by release date, (2) think if I want to get only one concert, 
+print("=============== Step 8 =================")
+## Step 8:
+## Make a CSV file called "event_media.csv"
+## trackName, artistName, normallength, collection, releaseDate
