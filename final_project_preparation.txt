@@ -9,7 +9,7 @@ Unique Name: falinw
   - If not, what will your project do, and what data sources will you use?
   - Explain what your project will do in words. Don’t just say “option 2”, for example — explain (briefly).
 
-  >> I choose option 2, which makes use of APIs of Ticketmaster and iTunes. My project will focus on searching recent "concerts" in Detroit area with Ticketmaster and then list the 10 most recent songs of that artists who performance in the concerts with iTunes research API.
+  >> I choose option 2, which makes use of APIs of Ticketmaster and iTunes. My project will focus on searching recent "concerts" by postal code (default will be "48104") with Ticketmaster and then list the details of the 10 most recent songs of that artists who perform in the concerts with iTunes research API.
 
 - Have you successfully gotten data from the APIs you need?
   - What, if any, problems are you currently encountering?
@@ -24,26 +24,67 @@ Unique Name: falinw
 - What will you need to copy in to your project from other sources provided in class?
   - e.g. for caching, or anything else?
   - Are you currently aware of any other code sources you may need to cite?
-  
-  >> I would need some parts of caching functions I wrote in the problem set 9 and function def params_unique_combination from problem set 10.
-  >> No, I only use what I learn from the class.
+
+  >> I would need some parts of caching functions I wrote in the problem set 9 and function def params_unique_combination from the problem set 10.
+  >> Yes, I am aware of that if I use the exact same code from the problem set, I need to cite.
 
 - Describe one of your class definition plans by answering each of the following questions:
   - Your class will be called what?
+
+  >> TicketmasterEvent
+
   - One instance of your class will represent one what?
+
+  >> an event which is held within the postal code the user input
+
   - The input to the constructor of the class to create a single instance will be what?
+
+  >> "event_diction"
+  >> for event_diction in CACHE_DICTION["ticketmaster"][unique_ident]["_embedded"]["events"]:
+        instance = TicketmasterEvent(event_diction)
+
   - What are at least 2 instance variables the class will have? What sort of data values will they contain?
+
+  >> self.artists: list of artists
+  >> self.eventname: string, title of the event
+  >> self.date: string, local date of the event
+  >> self.time: string, local time of the event start
+
   - What will the string method from this class return?
+
+  >> return "{} will performance in {} on {} {}!".format(artists_string_grammar, self.eventname, self.date, self.time)
+
   - What will a method that is NOT the constructor OR a string method do? Will it take any additional input? Will it return anything?
+
+  >> a method that makes the format of time to be more readable
+  >> would return a new string
 
 
 - Describe the second one of your class definition plans by answering each of the following questions:
   - Your class will be called what?
+  >> ITunesMedia
+
   - One instance of your class will represent one what?
+  >> the detail of a song
+
   - The input to the constructor of the class to create a single instance will be what?
+  >> song_diction
+  >> for song_diction in CACHE_DICTION["ticketmaster"][unique_ident]['results']:
+        instance = TicketmasterEvent(song_diction)
+  >>
+
   - What are at least 2 instance variables the class will have? What sort of data values will they contain?
+    >> self.artists = song_diction["artistName"] # the name of the artist
+    >> self.song = song_diction["trackName"] # the name of the song
+    >> self.milllength = song_diction["trackTimeMillis"] # the length in milliseconds of the song
+    >> self.collection = song_diction["collectionName"] # the collection name of the song
+    >> self.date = song_diction["releaseDate"] # released date of the song
+
   - What will the string method from this class return?
+  >> return "Date: {} \n Artist: {} \n Song: {} \n Album: {} \n Length:{} ".format(self.date, self.artists, self.song, self.collection, self.normallength())
+
   - What will a method that is NOT the constructor OR a string method do? Will it take any additional input? Will it return anything?
+  >> a method that converts milliseconds to minutes and seconds; will return a new string
 
 
 - What functions will you be defining outside class definitions? You need at least two.  For each, answer the following questions:
@@ -51,12 +92,19 @@ Unique Name: falinw
   - What will it be called?
   - What will its input be?
   - What do you expect its return value to be?
-
+  >> def get_event_data_with_caching(input_postal_code, within_miles = "200"):
+  >> input_postal_code: the USA postal code
+  >> (optional) how many miles for the searching radius
+  >> a jSON format dictionary
 
   Second function:
   - What will it be called?
   - What will its input be?
   - What do you expect its return value to be?
+  >> def get_artist_songs_with_caching(input_artist, how_many_songs = "10"):
+  >> input_artist: the keyword you want to search
+  >> (option) how_many_songs: how many songs you want to have?
+  >> a jSON format dictionary
 
 You may always have more than 2, but you must describe at least 2 here with these pieces of information.
 
@@ -65,7 +113,9 @@ You may always have more than 2, but you must describe at least 2 here with thes
   - What information will be in the file? What type of file will it be? What will it look like?
   - Briefly describe the process of creating the file from the program — what will you need to have completed in the program in order to successfully write the file you are planning to create?
 
-    >> 'cache_file_name.json'
-
+    >> 'cache_cache_cache.json': caching file
+    >> A CSV file: show the details of the songs and sorted by the release date
 
 - Describe in a sentence or two in what order you plan to tackle writing this code/working on this project. What comes first? Class definitions? Data investigation? What, approximately, is after that? What might come last? This doesn’t have to be exact, nor be exactly what you end up doing, but it should give you a good idea of where you’re going — and give us one, too.
+
+>> I first look at into the example JSON data that API documentation websites provide and decide what parts of data I am interested in and then design the class structure. After finishing design the function to request the API data, I would take the parts I want in the API data and reorganized them in another form which would be more readable.
