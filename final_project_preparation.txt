@@ -9,8 +9,7 @@ Unique Name: falinw
   - If not, what will your project do, and what data sources will you use?
   - Explain what your project will do in words. Don’t just say “option 2”, for example — explain (briefly).
 
-  >> I choose option 2, which makes use of APIs of Ticketmaster and iTunes. My project will focus on searching "concerts" on a certain location with Ticketmaster and then list the 10 most recent songs of that artist with iTunes research API.
-
+  >> I choose option 2, which makes use of APIs of Ticketmaster and iTunes. My project will focus on searching recent "concerts" in Detroit area with Ticketmaster and then list the 10 most recent songs of that artists who performance in the concerts with iTunes research API.
 
 - Have you successfully gotten data from the APIs you need?
   - What, if any, problems are you currently encountering?
@@ -18,15 +17,16 @@ Unique Name: falinw
 
 - Please provide the links to documentation for both APIs, and note whether or not an API key is required for it. (You should have your own API key at this point.)
 
-  o	Ticketmaster Discovery API: https://developer.ticketmaster.com/products-and-docs/apis/discovery-api/v2/
-  o	Find your Ticketmaster API key after getting an account on the website, and explore API possibilities: https://developer.ticketmaster.com/api-explorer/
-  o	iTunes: https://affiliate.itunes.apple.com/resources/documentation/itunes-store-web-service-search-api/
+  >> o	Ticketmaster Discovery API: https://developer.ticketmaster.com/products-and-docs/apis/discovery-api/v2/
+  >> o	Find your Ticketmaster API key after getting an account on the website, and explore API possibilities: https://developer.ticketmaster.com/api-explorer/
+  >> o	iTunes: https://affiliate.itunes.apple.com/resources/documentation/itunes-store-web-service-search-api/
 
 - What will you need to copy in to your project from other sources provided in class?
   - e.g. for caching, or anything else?
   - Are you currently aware of any other code sources you may need to cite?
-
-  I would need some parts of caching functions I wrote in the problem set 9 and yes, I am aware of the citation.
+  
+  >> I would need some parts of caching functions I wrote in the problem set 9 and function def params_unique_combination from problem set 10.
+  >> Yes, I am aware of the citation.
 
 - Describe one of your class definition plans by answering each of the following questions:
   - Your class will be called what?
