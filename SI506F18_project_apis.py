@@ -37,14 +37,25 @@ def get_flickr_data(tagstr, numfoto = 50):
         cache_file_object.close()
         return CACHE_DICTION[uni_ident]
 
-TM_API_KEY = ""
+TICKETMASTER_API_KEY = "ANXpHUscAoL1olptTu6QJlhNmiCQ0BQD"
 ITUNES_API_KEY = ""
+ticketmaster_root_url = "https://app.ticketmaster.com/discovery/v2/"
+
+
+# Look up multiple artists by their AMG artist IDs and get each artist’s 5 most recent songs: https://itunes.apple.com/lookup?amgArtistId=468749,5723&entity=song&limit=5&sort=recent.
 
 
 class TicketmasterEvent:
     ''
     def __init__:
         pass
+
+    def get_ticketmaster_data(concernamt):
+        ticketmaster_root_url = "https://app.ticketmaster.com/discovery/v2/"
+        diction_parameters = {}
+        diction_parameters["apikey"] = TICKETMASTER_API_KEY
+        diction_parameters["classificationName"] = "music"
+        diction_parameters["dmaId"] = dmaid
 
     def __str__:
         pass

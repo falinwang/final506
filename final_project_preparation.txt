@@ -1,22 +1,15 @@
-Author: Roy Wang
-Unique Name: falinw
-
-
 Final Project Preparation Questions (PART 2)
 https://paper.dropbox.com/doc/SI-506-F18-Final-Project-Prep-Questions-PART-2--ATAPS5cGC5bKo4cMa9o_6jDiAg-vpQkW7ZyCz5Lfdu4T171i
 
+Name: Roy Wang
+Unique Name: falinw
+
 - Are you using either of the final project guidelines? If so, which one? Tell us in words exactly what your project will do.
-
-  o	I choose the option 2, which is make use of APIs of Ticketmaster and iTunes.
-
   - Do you currently plan to make any changes to it?
   - If not, what will your project do, and what data sources will you use?
-
-    o	No, I do currently plan to make any changes to it.
-
   - Explain what your project will do in words. Don’t just say “option 2”, for example — explain (briefly).
 
-    o	My project will focus on searching "concerts" on certain location and then list the top 5 popular songs of that artist with iTunes database.
+  >> I choose option 2, which makes use of APIs of Ticketmaster and iTunes. My project will focus on searching "concerts" on a certain location with Ticketmaster and then list the 10 most recent songs of that artist with iTunes research API.
 
 
 - Have you successfully gotten data from the APIs you need?
@@ -24,6 +17,7 @@ https://paper.dropbox.com/doc/SI-506-F18-Final-Project-Prep-Questions-PART-2--AT
 
 
 - Please provide the links to documentation for both APIs, and note whether or not an API key is required for it. (You should have your own API key at this point.)
+
   o	Ticketmaster Discovery API: https://developer.ticketmaster.com/products-and-docs/apis/discovery-api/v2/
   o	Find your Ticketmaster API key after getting an account on the website, and explore API possibilities: https://developer.ticketmaster.com/api-explorer/
   o	iTunes: https://affiliate.itunes.apple.com/resources/documentation/itunes-store-web-service-search-api/
@@ -32,7 +26,7 @@ https://paper.dropbox.com/doc/SI-506-F18-Final-Project-Prep-Questions-PART-2--AT
   - e.g. for caching, or anything else?
   - Are you currently aware of any other code sources you may need to cite?
 
-  I would need some parts of caching functions I wrote in problem set 9 and yes, I am aware of the citation.
+  I would need some parts of caching functions I wrote in the problem set 9 and yes, I am aware of the citation.
 
 - Describe one of your class definition plans by answering each of the following questions:
   - Your class will be called what?
