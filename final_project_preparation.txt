@@ -14,11 +14,11 @@ Unique Name: falinw
 - Have you successfully gotten data from the APIs you need?
   - What, if any, problems are you currently encountering?
 
+    >> Yes, I have gotten data from the APIs I need.
 
 - Please provide the links to documentation for both APIs, and note whether or not an API key is required for it. (You should have your own API key at this point.)
 
-  >> o	Ticketmaster Discovery API: https://developer.ticketmaster.com/products-and-docs/apis/discovery-api/v2/
-  >> o	Find your Ticketmaster API key after getting an account on the website, and explore API possibilities: https://developer.ticketmaster.com/api-explorer/
+  >> o	Ticketmaster Discovery API: https://developer.ticketmaster.com/products-and-docs/apis/discovery-api/v2/#search-events-v2
   >> o	iTunes: https://affiliate.itunes.apple.com/resources/documentation/itunes-store-web-service-search-api/
 
 - What will you need to copy in to your project from other sources provided in class?
@@ -26,7 +26,7 @@ Unique Name: falinw
   - Are you currently aware of any other code sources you may need to cite?
   
   >> I would need some parts of caching functions I wrote in the problem set 9 and function def params_unique_combination from problem set 10.
-  >> Yes, I am aware of the citation.
+  >> No, I only use what I learn from the class.
 
 - Describe one of your class definition plans by answering each of the following questions:
   - Your class will be called what?
@@ -64,6 +64,8 @@ You may always have more than 2, but you must describe at least 2 here with thes
 - What file will you be creating?
   - What information will be in the file? What type of file will it be? What will it look like?
   - Briefly describe the process of creating the file from the program — what will you need to have completed in the program in order to successfully write the file you are planning to create?
+
+    >> 'cache_file_name.json'
 
 
 - Describe in a sentence or two in what order you plan to tackle writing this code/working on this project. What comes first? Class definitions? Data investigation? What, approximately, is after that? What might come last? This doesn’t have to be exact, nor be exactly what you end up doing, but it should give you a good idea of where you’re going — and give us one, too.
