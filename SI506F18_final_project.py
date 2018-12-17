@@ -1,10 +1,15 @@
 # SI506F18_final_project.py
 # My project will focus on searching recent "concerts" in Detroit area with Ticketmaster and then list the 10 most recent songs of that artists who performance in the concerts with iTunes research API.
+# -*- coding: utf-8 -*-
 
 # import
 import requests
 import json
 import csv
+import datetime
+import sys
+reload (sys)
+sys.setdefaultencoding('utf-8')
 
 # Create a cache file to store json file
 CACHE_FNAME = 'cache_cache_cache.json'
@@ -35,6 +40,8 @@ def params_unique_combination(baseurl, params_d, private_keys=["apikey"]):
 #       format: "Amos Lee"
 #   self.eventname = CACHE_DICTION[unique_ident]["_embedded"]["events"][0]["name"]
 #       format: "Amos Lee"
+#   self.eventlink = CACHE_DICTION[unique_ident]["_embedded"]["events"][0]["url"]
+#       format: "https://www.ticketmaster.com/needtobreathe-acoustic-live-tour-ann-arbor-michigan-02-15-2019/event/08005568F16B575A"
 #   self.date = CACHE_DICTION[unique_ident]["_embedded"]["events"][0]["dates"]["start"]["localDate"]
 #       format: "2019-04-02"
 #   self.time = CACHE_DICTION[unique_ident]["_embedded"]["events"][0]["dates"]["start"]["localTime"]
@@ -48,25 +55,35 @@ class TicketmasterEvent(object):
         for artist in event_diction["_embedded"]["attractions"]:
             self.artists.append(artist["name"])
         self.eventname = event_diction["name"] # the name of event
+        self.eventlink = event_diction["url"] # the link of event
         self.date = event_diction["dates"]["start"]["localDate"] # the date of event
         self.time = event_diction["dates"]["start"]["localTime"] # the time of event
 
-    # Print method
-    def __str__(self):
+    # Extra method
+    # Adjust the grammer of artists for print method
+    def artists_string_grammar(self):
         artists_string_grammar = ""
         how_many_artists = len(self.artists)
         if how_many_artists == 1:
             artists_string_grammar = self.artists[0]
         elif how_many_artists == 2:
-            artists_string_grammar = self.artists[0] + " and " + self.artists[0]
+            artists_string_grammar = self.artists[0] + " and " + self.artists[1]
         else:
             for i in self.artists[:how_many_artists-1]:
                 artists_string_grammar = artists_string_grammar + i + ", "
             artists_string_grammar = artists_string_grammar + ", and " + self.artists[-1]
-        return "{} will performance in the concert '{}' on {} {}!".format(artists_string_grammar, self.eventname, self.date, self.time)
+        return artists_string_grammar
+
+    # def timeformatting(self):
+    #     formatted_date = self.date.strftime('%d, %b %Y')
+    #     return formatted_date
+
+    # Print method
+    def __str__(self):
+        return "{} will performance in the concert '{}' on {} {}!\nYou can buy the ticket here: {}".format(self.artists_string_grammar().encode('utf-8'), self.eventname.encode('utf-8'), self.date, self.time, self.eventlink)
         # print the artist name and the event details
 
-## Step 3:
+## Step 2:
 ## Make a search on Ticketmaster (accessing and caching data)
 ## ============================
 ## | Ticketmaster API request |
@@ -110,37 +127,54 @@ def get_event_data_with_caching(input_postal_code, within_miles = "200"):
         return CACHE_DICTION[unique_ident]
 
 
-## Step 4:
+## Step 3:
 ## Using that data to create a list of instance of TicketmasterEvent
 # Create a empty instance list
 instance_list_ticketmaster = []
 instance_list_ticketmaster_artists = []
 
-# Request the data form ticketmaster api with the parameter: "48104" which is Ann Arbor, MI
-postalcode = input("Enter 5 digits postal code to search the concert: ")
-nearest_concert = get_event_data_with_caching(postalcode)
+# # Request the data form ticketmaster api with the parameter: "48104" which is Ann Arbor, MI
+# postalcode = input("To search the concert near you, enter 5 digits postal code (eg. 48104): ")
+# nearest_concert = get_event_data_with_caching(postalcode)
+#
+# #   event_diction = CACHE_DICTION[unique_ident]["_embedded"]["events"][0]
+# try:
+#     for event_diction in nearest_concert["_embedded"]["events"]:
+#         instance = TicketmasterEvent(event_diction)
+#         instance_list_ticketmaster.append(instance)
+#         instance_list_ticketmaster_artists = instance.artists
+#     print("Searching for the concert ...")
+# except:
+#     print("Sorry, no concert in this area. Please try another postal code.")
 
-#   event_diction = CACHE_DICTION[unique_ident]["_embedded"]["events"][0]
-try:
-    for event_diction in nearest_concert["_embedded"]["events"]:
-        instance = TicketmasterEvent(event_diction)
-        instance_list_ticketmaster.append(instance)
-        instance_list_ticketmaster_artists = instance.artists
-except:
-    print("No concert in this area. Please try again.")
-
-print("* REQUESTING DATA FROM TICKETMASTER API:")
-
+while True:
+    postalcode = input("To search the concert near you, enter 5 digits postal code (eg. 48104): \n")
+    nearest_concert = get_event_data_with_caching(postalcode)
+    try:
+        for event_diction in nearest_concert["_embedded"]["events"]:
+            instance = TicketmasterEvent(event_diction)
+            instance_list_ticketmaster.append(instance)
+            instance_list_ticketmaster_artists = instance.artists
+        print("Searching for the concert in {} with Ticketmaster API ...".format(postalcode))
+    except:
+        print("\nSorry, no concert in this area. Please try another postal code.")
+    else:
+        print("Congrats! We found this concert for you:")
+        break
+print("=======================================================================================")
+# Print the concert details
 if instance_list_ticketmaster != []:
     # print(instance_list_ticketmaster_artists)
     for i in instance_list_ticketmaster:
         print(i)
+print("=======================================================================================")
+print("Guess what?! We also found 10 recommended songs of concert lineup for you!\n")
 
 
 
-print("\n=============== ITUNES =================\n")
+# =============== ITUNES =================
 
-## Step 2:
+## Step 4:
 ## Create a class called "ITunesMedia" that represents one piece of iTunes media, which would be a sond ny investigating iTunes API documentation.
 # The structrue of iTunes API data:
 #   CACHE_DICTION[unique_ident]["results"][0]
@@ -166,7 +200,7 @@ class ITunesMedia(object):
         self.collection = song_diction["collectionName"] # the collection name of the song
         self.date = song_diction["releaseDate"] # released date of the song
 
-    # Extra method
+    # Additional method
     def normallength(self):
         mins = int(self.milllength / 1000 / 60)
         secs = int((self.milllength / 1000) % 60)
@@ -175,9 +209,11 @@ class ITunesMedia(object):
 
     # Print Method
     def __str__(self):
-        return "Date: {} \n Artist: {} \n Song: {} \n Album: {} \n Length:{} ".format(self.date, self.artists, self.song, self.collection, self.normallength())
+        return "Artist: {} \nSong: {} \nAlbum: {} \nLength: {} \nDate: {} \n".format(self.artists.encode('utf-8'), self.song.encode('utf-8'), self.collection.encode('utf-8'), self.normallength(), self.date)
 
 
+## Step 5:
+## Make a search on iTunes API (accessing and caching data)
 ## ============================
 ## |    iTunes API request    |
 ## ============================
@@ -208,37 +244,46 @@ def get_artist_songs_with_caching(input_artist, how_many_songs = "10"):
         return CACHE_DICTION[unique_ident]
 
 
+## Step 6:
 ## Create an empty master list to hold iTunes results
 itunes_results_master = []
 
+## Step 7:
 ## Create a list to store the instance of ITunesMedia of each artist we got from TicketmasterEvent
-instance_songs_of_artist = []
 ## The list will store the data of 10 songs of the artist
 
 ## For each artist of Ticketmaster event, make a search on the iTunes Search API
+# instance_list_ticketmaster_artists = [u'NEEDTOBREATHE', u'Matt Maeson']
+
 for artist in instance_list_ticketmaster_artists:
-    json_itunes = get_artist_songs_with_caching(artist)
+    instance_songs_of_artist = []
+    json_itunes = get_artist_songs_with_caching(artist.replace(" ","+"))
     for song_diction in json_itunes['results']:
         data_each_song = ITunesMedia(song_diction)
-        print(data_each_song)
+        # print(data_each_song)
         ## Add each song's data in the list of instance_songs_of_artist
         instance_songs_of_artist.append(data_each_song)
-    ## Add everything in that list to master list of iTunes results
-    itunes_results_master.append(instance_songs_of_artist)
-    # print(itunes_results_master)
-
-
-print("\n=============== CSV =================\n")
+    # print("End of {}".format(artist))
 ## Step 8:
+    ## Add everything in that list to master list of iTunes results with sorted list
+    ## The list of songs is sorted by the release date (from the latest to the oldest)
+    itunes_results_master.append(sorted(instance_songs_of_artist, key = lambda x: x.date, reverse = True))
+
+# print(itunes_results_master)
+
+
+# print("\n=============== CSV =================\n")
+## Step 9:
 ## Make a CSV file called "event_media.csv"
-## trackName, artistName, normallength, collection, releaseDate
-
-# You'll need to spend a bit more time thinking about what you want in your CSV file and how you will go about writing it
-# (Some questions to consider: Should the length of song values be in milliseconds or minutes? Should you include any data from Ticketmaster, such as links to upcoming shows?).
-
 
 csv_file = open("event_media.CSV", "w")
-csv_file.write("Concert,Concert Date,Concert Time,Artist,Track Title,Album,Length,Release Date\n")
+csv_file.write("Concert,Date,Time,Lineup,Link\n")
+for event in instance_list_ticketmaster:
+    csv_file.write("{},{},{},{},{}\n".format(event.eventname, event.date, event.time, event.artists_string_grammar(), event.eventlink))
+csv_file.write("\n")
+csv_file.write("Artist,Track,Album,Length,Release Date\n")
+for artist in itunes_results_master:
+    for song in artist:
+        csv_file.write("{},{},{},{},{}\n".format(song.artists.replace(',', '&'), song.song.replace(',', ''), song.collection.replace(',', '&'), song.normallength(), song.date))
 csv_file.close()
-print("The csv file is created")
-# print("The file has been created successfully. Let's open the 'event_media.CSV' file to see the sorted, and well-formatted results!")
+print("The CSV file is created successfully. Open the file and Listen to the top 10 songs we have sorted for you.\nLet's start from the latest one! Enjoy!")
