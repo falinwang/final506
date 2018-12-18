@@ -5,8 +5,9 @@
 # import
 import requests
 import json
+# import csv to create a csv file
 import csv
-import datetime
+# import sys to resolve the encoding problem
 import sys
 reload (sys)
 sys.setdefaultencoding('utf-8')
@@ -161,13 +162,13 @@ while True:
     else:
         print("Congrats! We found this concert for you:")
         break
-print("=======================================================================================")
+print("==================================================================================")
 # Print the concert details
 if instance_list_ticketmaster != []:
     # print(instance_list_ticketmaster_artists)
     for i in instance_list_ticketmaster:
         print(i)
-print("=======================================================================================")
+print("==================================================================================")
 print("Guess what?! We also found 10 recommended songs of concert lineup for you!\n")
 
 
