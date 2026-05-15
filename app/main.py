@@ -73,7 +73,7 @@ async def debug_ticketmaster(postal_code: str = Query("90020")):
 
     params = {
         "apikey": settings.ticketmaster_api_key,
-        "classificationName": "music",
+        "segmentId": "KZFzniwnSyZfZ7v7n1",
         "postalCode": postal_code,
         "countryCode": "US",
         "radius": "50",

@@ -30,7 +30,7 @@ async def fetch_concerts(
 
     params = {
         "apikey": settings.ticketmaster_api_key,
-        "classificationName": "music",
+        "segmentId": "KZFzniwnSyZfZ7v7n1",  # Music segment (stable official ID)
         "postalCode": postal_code,
         "countryCode": "US",
         "radius": str(radius),
