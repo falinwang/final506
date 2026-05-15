@@ -1,61 +1,41 @@
-506 Final Project
+Concert Finder — To-Do
+Updated: 2026/05/15
 
-Timeline
-- 12/5 Submit
-  - "final_project_preparation.txt" and
-  - "SI506F18_project_apis"
-- 12/17 Final Due
-  - "SI506_finalproject.zip"
-    - "SI506F18_final_project.py"
-    - "README.txt"
-    - Any SAMPLE output files (name different from the output files)
+================================================================================
+COMPLETED
+================================================================================
 
-To-do list for 12-5
-  1 Reading all document
-  2-1 Answer Final Project Preparation Questions
-      https://paper.dropbox.com/doc/SI-506-F18-Final-Project-Prep-Questions-PART-2--ATAPS5cGC5bKo4cMa9o_6jDiAg-vpQkW7ZyCz5Lfdu4T171i
-  2-2 create "final_project_preparation.txt" and copy Questions to there (SI 506 F18 - Final Project Prep Questions (PART 2)
-  )
-  3-1 create "called SI506F18_project_apis.py"
-  3-2 Request to get data from 2 APIs
-  3-3 no need to cache
-  3-4 include API keys to be run-able
+[x] Modernize CLI script → async FastAPI web service
+[x] Replace file-based JSON cache with in-memory TTL cache (app/cache.py)
+[x] Replace postalCode param with lat/long geocoding via Nominatim
+[x] Switch to segmentId for reliable Music filter in Ticketmaster API
+[x] Filter non-music / irrelevant events and iTunes results
+[x] Add Pydantic models (Concert, Track, ArtistTracks, SearchResult)
+[x] Build single-page frontend (Tailwind CSS, vanilla JS)
+[x] Add time range preset filter (This Week / This Month / Next 3 Months)
+[x] Add start_date / end_date query params to /api/search
+    - Calendar validation via date.fromisoformat()
+    - ISO 8601 conversion (T00:00:00Z / T23:59:59Z)
+    - Ordering guard (422 if end < start)
+[x] Fix isoDate() timezone off-by-one for UTC-negative users
+[x] Add context-aware empty-state hint for narrow presets
+[x] Add /api/cache/clear endpoint
+[x] Write test suite (12 tests — test_ticketmaster.py + test_search_api.py)
+[x] Update README, event_media.CSV, final_project_preparation.txt
+[x] Delete legacy cache JSON files
 
----
-Option 2 - Events (Ticketmaster, iTunes)
-Note that these are only SUGGESTED GUIDELINES. You can alter these in any way, as long as you fulfill all requirements.
+================================================================================
+IN PROGRESS
+================================================================================
 
+[ ] Create PR for time range filter + cache clear + cleanup changes
 
-•	Select a category you are interested in searching on Ticketmaster — for example, “music” or “sports” or whatever. (Check out the Ticketmaster documentation/website overall for ideas!)
-o	Ticketmaster Discovery API: https://developer.ticketmaster.com/products-and-docs/apis/discovery-api/v2/
-o	Find your Ticketmaster API key after getting an account on the website, and explore API possibilities: https://developer.ticketmaster.com/api-explorer/
+================================================================================
+BACKLOG
+================================================================================
 
-
-•	Investigate Ticketmaster data. Use that experience to define a class TicketmasterEvent that fulfills requirements and will be useful as a tool in the rest of the program.
-
-
-•	Investigate iTunes Search API data examples to define a class ITunesMedia that represents one piece of iTunes media (a song, a music video, a movie, could be whatever comes up), which fulfills requirements and will be useful as a tool in the rest of the program.
-
-
-•	Make a search on Ticketmaster (accessing and caching data).
-
-
-•	Using that data, create a list of instances of TicketmasterEvent.
-
-
-•	Each Ticketmaster event probably has a name or a genre (or something else of particular interest).
-  o	Create an empty master list to hold ALL iTunes results.
-  o	For each one of those Ticketmaster events (each event’s genre, each event’s name… or whatever you pick), make a search on the iTunes Search API with that term.
-  o	From the resulting data, create a list of instances of iTunesMedia, and add everything in that list to your master list of iTunes results.
-
-
-•	Iterate over the list of iTunes results, and create a CSV file called event_media.csv with the following columns and corresponding information:
-  o	Media name
-  o	Artist/creator
-  o	Length in seconds or minutes, if applicable
-  o	Collection name, if applicable
-  o	Any other interesting piece of data that might be available for iTunes media (this may depend on what sort of thing your searches turn up!)
-
-
-Also possible as a nice challenge to make your resulting data more readable:
-o	Sort the items by length or by length of title before writing them to the CSV file
+[ ] Fix active preset button border color on selection (minor visual)
+[ ] Add aria-pressed / role="group" for accessibility on preset toggle
+[ ] Consider local-day-boundary handling for Ticketmaster startDateTime (UTC vs local)
+[ ] Add integration test against real Ticketmaster API (optional, needs key)
+[ ] Persist selected preset across page reloads (localStorage)

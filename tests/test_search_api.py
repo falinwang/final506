@@ -83,3 +83,38 @@ def test_search_returns_422_when_end_date_is_past_and_start_omitted():
 def test_search_returns_422_for_calendar_invalid_date():
     resp = client.get("/api/search?postal_code=48104&start_date=2026-02-30")
     assert resp.status_code == 422
+
+
+def test_search_inglewood_returns_concert_and_tracks():
+    inglewood_concert = Concert(
+        event_name="Kia Forum Night",
+        artists=["Kendrick Lamar"],
+        date="2026-07-04",
+        time="20:00:00",
+        url="http://ticketmaster.com/kia-forum",
+    )
+    inglewood_tracks = ArtistTracks(
+        artist="Kendrick Lamar",
+        tracks=[
+            Track(artist="Kendrick Lamar", title="HUMBLE.", album="DAMN.", length="2:57", release_date="2017-04-14"),
+            Track(artist="Kendrick Lamar", title="DNA.", album="DAMN.", length="3:05", release_date="2017-04-14"),
+        ],
+    )
+    p1, p2 = _patch_services(concerts=[inglewood_concert], tracks=[inglewood_tracks])
+    with p1 as mock_fetch, p2:
+        resp = client.get("/api/search?postal_code=90301&radius=25&start_date=2026-07-01&end_date=2026-07-31")
+
+    assert resp.status_code == 200
+    args, kwargs = mock_fetch.call_args
+    assert args[0] == "90301"
+    assert args[1] == 25
+    assert kwargs.get("start_dt") == "2026-07-01T00:00:00Z"
+    assert kwargs.get("end_dt") == "2026-07-31T23:59:59Z"
+
+    data = resp.json()
+    assert len(data) == 1
+    assert data[0]["concert"]["event_name"] == "Kia Forum Night"
+    assert data[0]["concert"]["artists"] == ["Kendrick Lamar"]
+    assert data[0]["lineups"][0]["artist"] == "Kendrick Lamar"
+    assert len(data[0]["lineups"][0]["tracks"]) == 2
+    assert data[0]["lineups"][0]["tracks"][0]["title"] == "HUMBLE."

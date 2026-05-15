@@ -7,6 +7,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from app import cache as _cache
 from app.models import SearchResult
 from app.services.itunes import fetch_tracks_for_many
 from app.services.ticketmaster import fetch_concerts
@@ -77,6 +78,12 @@ async def search(
         results.append(SearchResult(concert=concert, lineups=lineups))
 
     return results
+
+
+@app.post("/api/cache/clear")
+async def clear_cache():
+    count = await _cache.clear()
+    return {"cleared": count}
 
 
 @app.get("/api/health")
