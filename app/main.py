@@ -1,4 +1,5 @@
 import asyncio
+from datetime import date as _date
 from pathlib import Path
 
 import uvicorn
@@ -27,16 +28,26 @@ async def search(
     radius: int = Query(50, ge=1, le=500),
     concerts_limit: int = Query(3, ge=1, le=10),
     tracks_limit: int = Query(10, ge=1, le=25),
+    start_date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
+    end_date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
 ):
+    resolved_start = start_date or _date.today().isoformat()
+    if end_date and end_date < resolved_start:
+        raise HTTPException(422, "end_date must not be before start_date")
+
+    start_dt = f"{resolved_start}T00:00:00Z"
+    end_dt = f"{end_date}T23:59:59Z" if end_date else None
+
     try:
-        concerts = await fetch_concerts(postal_code, radius, concerts_limit)
+        concerts = await fetch_concerts(
+            postal_code, radius, concerts_limit, start_dt=start_dt, end_dt=end_dt
+        )
     except Exception as e:
         raise HTTPException(502, f"Ticketmaster error: {e}")
 
     if not concerts:
         raise HTTPException(404, "No concerts found for this area.")
 
-    # Flatten unique artists across all concerts, preserve order
     seen: set[str] = set()
     unique_artists: list[str] = []
     for concert in concerts:
@@ -50,16 +61,11 @@ async def search(
     except Exception as e:
         raise HTTPException(502, f"iTunes error: {e}")
 
-    # Map artist → tracks for quick lookup
     tracks_by_artist = {lt.artist: lt for lt in all_lineups}
 
     results = []
     for concert in concerts:
-        lineups = [
-            tracks_by_artist[a]
-            for a in concert.artists
-            if a in tracks_by_artist
-        ]
+        lineups = [tracks_by_artist[a] for a in concert.artists if a in tracks_by_artist]
         results.append(SearchResult(concert=concert, lineups=lineups))
 
     return results
