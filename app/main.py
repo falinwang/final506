@@ -66,25 +66,35 @@ async def search(
 
 
 @app.get("/api/debug/ticketmaster")
-async def debug_ticketmaster(postal_code: str = Query("90020")):
+async def debug_ticketmaster():
     import httpx
     from app.config import settings
 
     base = "https://app.ticketmaster.com/discovery/v2/events"
-    base_params = {"apikey": settings.ticketmaster_api_key, "postalCode": postal_code, "size": "3"}
+    key = settings.ticketmaster_api_key
 
     async with httpx.AsyncClient(timeout=10) as client:
-        # Test 1: no filters at all
-        r1 = await client.get(base, params=base_params)
-        # Test 2: with segmentName (Ticketmaster's preferred music filter)
-        r2 = await client.get(base, params={**base_params, "segmentName": "Music"})
-        # Test 3: with classificationName + radius in km (default unit)
-        r3 = await client.get(base, params={**base_params, "classificationName": "music", "radius": "80"})
+        # No location — just "are there ANY events?"
+        r_global = await client.get(base, params={"apikey": key, "size": "1"})
+        # Keyword search instead of postal code
+        r_keyword = await client.get(base, params={"apikey": key, "keyword": "concert", "size": "1"})
+        # City name instead of postal code
+        r_city = await client.get(base, params={"apikey": key, "city": "Los Angeles", "size": "1"})
+
+    def summary(r: httpx.Response) -> dict:
+        body = r.json()
+        total = body.get("page", {}).get("totalElements", "n/a")
+        first = None
+        events = body.get("_embedded", {}).get("events", [])
+        if events:
+            first = events[0].get("name")
+        return {"status": r.status_code, "total": total, "first_event": first}
 
     return {
-        "no_filter":        {"total": r1.json().get("page", {}).get("totalElements"), "status": r1.status_code},
-        "segmentName_Music": {"total": r2.json().get("page", {}).get("totalElements"), "status": r2.status_code},
-        "classificationName_radius80km": {"total": r3.json().get("page", {}).get("totalElements"), "status": r3.status_code},
+        "key_used": f"{key[:6]}...{key[-4:]}",
+        "global_no_filter": summary(r_global),
+        "keyword_concert":  summary(r_keyword),
+        "city_los_angeles": summary(r_city),
     }
 
 
