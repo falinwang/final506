@@ -5,6 +5,8 @@ from app.models import Concert
 
 _BASE = "https://app.ticketmaster.com/discovery/v2/events"
 _NOMINATIM = "https://nominatim.openstreetmap.org/search"
+# segmentId already restricts to Music; these catch edge-case non-concert events
+_NON_MUSIC_KEYWORDS = {"ceremony", "graduation", "exhibition", "comedy"}
 
 
 async def _zip_to_latlong(postal_code: str, client: httpx.AsyncClient) -> str | None:
@@ -74,8 +76,6 @@ async def fetch_concerts(
     finally:
         if owned:
             await client.aclose()
-
-    _NON_MUSIC_KEYWORDS = {"tour", "guided", "ceremony", "graduation", "exhibition", "comedy"}
 
     events = data.get("_embedded", {}).get("events", [])
     concerts = [

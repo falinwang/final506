@@ -95,7 +95,7 @@ except:
     CACHE_DICTION = {}
 
 # my API key
-TICKETMASTER_API_KEY = "ANXpHUscAoL1olptTu6QJlhNmiCQ0BQD" # 5000 requests every 1 day
+TICKETMASTER_API_KEY = "REVOKED_SEE_ENV_FILE"  # key was exposed in git; rotate at developer.ticketmaster.com
 
 def get_event_data_with_caching(input_postal_code, within_miles = "200"):
     baseurl = "https://app.ticketmaster.com/discovery/v2/events"
