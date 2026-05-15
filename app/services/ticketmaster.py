@@ -4,6 +4,26 @@ from app.config import settings
 from app.models import Concert
 
 _BASE = "https://app.ticketmaster.com/discovery/v2/events"
+_NOMINATIM = "https://nominatim.openstreetmap.org/search"
+
+
+async def _zip_to_latlong(postal_code: str, client: httpx.AsyncClient) -> str | None:
+    cache_key = f"geo:{postal_code}"
+    if cached := await cache.get(cache_key, 86400 * 30):  # 30-day cache for geo
+        return cached
+
+    resp = await client.get(
+        _NOMINATIM,
+        params={"postalcode": postal_code, "country": "US", "format": "json", "limit": "1"},
+        headers={"User-Agent": "concert-finder/2.0"},
+    )
+    results = resp.json()
+    if not results:
+        return None
+
+    latlong = f"{results[0]['lat']},{results[0]['lon']}"
+    await cache.set(cache_key, latlong)
+    return latlong
 
 
 def _parse(event: dict) -> Concert:
@@ -28,22 +48,25 @@ async def fetch_concerts(
     if cached := await cache.get(cache_key, settings.cache_ttl_seconds):
         return [Concert(**c) for c in cached]
 
-    params = {
-        "apikey": settings.ticketmaster_api_key,
-        "segmentId": "KZFzniwnSyZfZ7v7n1",  # Music segment (stable official ID)
-        "postalCode": postal_code,
-        "countryCode": "US",
-        "radius": str(radius),
-        "unit": "miles",
-        "size": str(limit),
-        "sort": "date,asc",
-    }
-
     owned = client is None
     if owned:
         client = httpx.AsyncClient(timeout=10)
 
     try:
+        latlong = await _zip_to_latlong(postal_code, client)
+        if not latlong:
+            return []
+
+        params = {
+            "apikey": settings.ticketmaster_api_key,
+            "segmentId": "KZFzniwnSyZfZ7v7n1",  # Music (stable official ID)
+            "latlong": latlong,
+            "radius": str(radius),
+            "unit": "miles",
+            "size": str(limit),
+            "sort": "date,asc",
+        }
+
         resp = await client.get(_BASE, params=params)
         resp.raise_for_status()
         data = resp.json()
