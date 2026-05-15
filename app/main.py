@@ -66,27 +66,26 @@ async def search(
 
 
 @app.get("/api/debug/ticketmaster")
-async def debug_ticketmaster(
-    postal_code: str = Query("90020"),
-    radius: int = Query(50),
-):
+async def debug_ticketmaster(postal_code: str = Query("90020")):
     import httpx
     from app.config import settings
 
-    params = {
-        "apikey": settings.ticketmaster_api_key,
-        "classificationName": "music",
-        "postalCode": postal_code,
-        "radius": str(radius),
-        "unit": "miles",
-        "size": "3",
-        "sort": "date,asc",
-    }
+    base = "https://app.ticketmaster.com/discovery/v2/events"
+    base_params = {"apikey": settings.ticketmaster_api_key, "postalCode": postal_code, "size": "3"}
+
     async with httpx.AsyncClient(timeout=10) as client:
-        resp = await client.get(
-            "https://app.ticketmaster.com/discovery/v2/events", params=params
-        )
-    return {"status": resp.status_code, "body": resp.json()}
+        # Test 1: no filters at all
+        r1 = await client.get(base, params=base_params)
+        # Test 2: with segmentName (Ticketmaster's preferred music filter)
+        r2 = await client.get(base, params={**base_params, "segmentName": "Music"})
+        # Test 3: with classificationName + radius in km (default unit)
+        r3 = await client.get(base, params={**base_params, "classificationName": "music", "radius": "80"})
+
+    return {
+        "no_filter":        {"total": r1.json().get("page", {}).get("totalElements"), "status": r1.status_code},
+        "segmentName_Music": {"total": r2.json().get("page", {}).get("totalElements"), "status": r2.status_code},
+        "classificationName_radius80km": {"total": r3.json().get("page", {}).get("totalElements"), "status": r3.status_code},
+    }
 
 
 @app.get("/api/health")
