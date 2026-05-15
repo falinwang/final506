@@ -17,3 +17,10 @@ async def get(key: str, ttl: int) -> Any | None:
 async def set(key: str, value: Any) -> None:
     async with _lock:
         _store[key] = (value, time.monotonic())
+
+
+async def clear() -> int:
+    async with _lock:
+        count = len(_store)
+        _store.clear()
+        return count

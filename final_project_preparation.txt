@@ -1,121 +1,100 @@
-Final Project Preparation Questions (PART 2)
-https://paper.dropbox.com/doc/SI-506-F18-Final-Project-Prep-Questions-PART-2--ATAPS5cGC5bKo4cMa9o_6jDiAg-vpQkW7ZyCz5Lfdu4T171i
+Final Project Preparation — Updated
+Originally: SI 506 F18 Final Project Prep Questions (PART 2)
 
 Name: Roy Wang
 Unique Name: falinw
+Original Date: 2018/12/17
+Updated: 2026/05/15
 
-- Are you using either of the final project guidelines? If so, which one? Tell us in words exactly what your project will do.
-  - Do you currently plan to make any changes to it?
-  - If not, what will your project do, and what data sources will you use?
-  - Explain what your project will do in words. Don’t just say “option 2”, for example — explain (briefly).
+================================================================================
+ORIGINAL SUBMISSION (2018)
+================================================================================
 
-  >> I choose option 2, which makes use of APIs of Ticketmaster and iTunes. My project will focus on searching recent "concerts" by postal code (default will be "48104") with Ticketmaster and then list the details of the 10 most recent songs of that artists who perform in the concerts with iTunes research API.
+Project Option: Option 2 — Ticketmaster + iTunes APIs
 
-- Have you successfully gotten data from the APIs you need?
-  - What, if any, problems are you currently encountering?
+The project searched for recent concerts by US postal code using the Ticketmaster
+Discovery API, retrieved the top 10 songs per performing artist via the iTunes
+Search API, and wrote results to a CSV file.
 
-    >> Yes, I have gotten data from the APIs I need.
+Key components:
+  - CLI input loop (postal code prompt)
+  - Two classes: TicketmasterEvent, ITunesMedia
+  - File-based JSON cache (cache_cache_cache.json)
+  - Output: event_media.CSV
 
-- Please provide the links to documentation for both APIs, and note whether or not an API key is required for it. (You should have your own API key at this point.)
+Entry point: SI506F18_final_project.py
+Dependencies: requests, json, csv, sys
 
-  >> o	Ticketmaster Discovery API: https://developer.ticketmaster.com/products-and-docs/apis/discovery-api/v2/#search-events-v2
-  >> o	iTunes: https://affiliate.itunes.apple.com/resources/documentation/itunes-store-web-service-search-api/
+================================================================================
+MODERNIZATION (2026)
+================================================================================
 
-- What will you need to copy in to your project from other sources provided in class?
-  - e.g. for caching, or anything else?
-  - Are you currently aware of any other code sources you may need to cite?
+The project has been rewritten as an async FastAPI web service while keeping
+the same core idea: find nearby concerts and surface top songs for each artist.
 
-  >> I would need some parts of caching functions I wrote in the problem set 9 and function def params_unique_combination from the problem set 10.
-  >> Yes, I am aware of that if I use the exact same code from the problem set, I need to cite.
+--- Architecture ---
 
-- Describe one of your class definition plans by answering each of the following questions:
-  - Your class will be called what?
+  app/
+    main.py           — FastAPI app, /api/search endpoint, /api/cache/clear
+    models.py         — Pydantic models: Concert, Track, ArtistTracks, SearchResult
+    cache.py          — In-memory async cache (_store dict, TTL-based)
+    config.py         — Settings via pydantic-settings (.env)
+    services/
+      ticketmaster.py — fetch_concerts(): geocode ZIP → Ticketmaster API
+      itunes.py       — fetch_tracks_for_many(): iTunes Search API
+    static/
+      index.html      — Single-page frontend (Tailwind CSS, vanilla JS)
 
-  >> TicketmasterEvent
+  tests/
+    test_ticketmaster.py  — 5 unit tests for fetch_concerts
+    test_search_api.py    — 8 unit tests for /api/search
 
-  - One instance of your class will represent one what?
+--- What Changed ---
 
-  >> an event which is held within the postal code the user input
+  From CLI → async FastAPI web service
+  From file-based JSON cache → in-memory TTL cache (app/cache.py)
+  From postalCode param → lat/long via Nominatim geocoding (OpenStreetMap)
+  From segmentName filter → segmentId "KZFzniwnSyZfZ7v7n1" for reliable Music filter
+  From CSV output → JSON API responses rendered in browser
+  Added: time range filter (This Week / This Month / Next 3 Months presets)
+  Added: calendar-valid date validation, ISO 8601 conversion
+  Added: context-aware empty-state messaging
+  Added: /api/cache/clear endpoint
 
-  - The input to the constructor of the class to create a single instance will be what?
+--- API Endpoints ---
 
-  >> "event_diction"
-  >> for event_diction in CACHE_DICTION["ticketmaster"][unique_ident]["_embedded"]["events"]:
-        instance = TicketmasterEvent(event_diction)
+  GET  /api/search        Search concerts + artist tracks
+       postal_code        5-digit US ZIP (required)
+       radius             Search radius in miles, default 50
+       concerts_limit     Max concerts returned, default 3
+       tracks_limit       Max tracks per artist, default 10
+       start_date         YYYY-MM-DD, defaults to today
+       end_date           YYYY-MM-DD, optional
 
-  - What are at least 2 instance variables the class will have? What sort of data values will they contain?
+  POST /api/cache/clear   Flush in-memory cache, returns {"cleared": N}
+  GET  /api/health        Health check
 
-  >> self.artists: list of artists
-  >> self.eventname: string, title of the event
-  >> self.date: string, local date of the event
-  >> self.time: string, local time of the event start
+--- Data Sources ---
 
-  - What will the string method from this class return?
+  Ticketmaster Discovery API v2
+  https://developer.ticketmaster.com/products-and-docs/apis/discovery-api/v2/
+  API key required — set TICKETMASTER_API_KEY in .env
 
-  >> return "{} will performance in {} on {} {}!".format(artists_string_grammar, self.eventname, self.date, self.time)
+  iTunes Search API
+  https://developer.apple.com/library/archive/documentation/AudioVideo/Conceptual/iTuneSearchAPI/
+  No API key required
 
-  - What will a method that is NOT the constructor OR a string method do? Will it take any additional input? Will it return anything?
+  Nominatim (OpenStreetMap) — ZIP code to lat/long geocoding
+  https://nominatim.org/release-docs/latest/api/Search/
+  No API key required
 
-  >> a method that makes the format of time to be more readable
-  >> would return a new string
+--- How to Run ---
 
+  python -m venv venv
+  source venv/bin/activate
+  pip install -e ".[dev]"
+  cp .env.example .env    # add TICKETMASTER_API_KEY
+  serve                   # starts on http://localhost:8000
 
-- Describe the second one of your class definition plans by answering each of the following questions:
-  - Your class will be called what?
-  >> ITunesMedia
-
-  - One instance of your class will represent one what?
-  >> the detail of a song
-
-  - The input to the constructor of the class to create a single instance will be what?
-  >> song_diction
-  >> for song_diction in CACHE_DICTION["ticketmaster"][unique_ident]['results']:
-        instance = TicketmasterEvent(song_diction)
-  >>
-
-  - What are at least 2 instance variables the class will have? What sort of data values will they contain?
-    >> self.artists = song_diction["artistName"] # the name of the artist
-    >> self.song = song_diction["trackName"] # the name of the song
-    >> self.milllength = song_diction["trackTimeMillis"] # the length in milliseconds of the song
-    >> self.collection = song_diction["collectionName"] # the collection name of the song
-    >> self.date = song_diction["releaseDate"] # released date of the song
-
-  - What will the string method from this class return?
-  >> return "Date: {} \n Artist: {} \n Song: {} \n Album: {} \n Length:{} ".format(self.date, self.artists, self.song, self.collection, self.normallength())
-
-  - What will a method that is NOT the constructor OR a string method do? Will it take any additional input? Will it return anything?
-  >> a method that converts milliseconds to minutes and seconds; will return a new string
-
-
-- What functions will you be defining outside class definitions? You need at least two.  For each, answer the following questions:
-  First function:
-  - What will it be called?
-  - What will its input be?
-  - What do you expect its return value to be?
-  >> def get_event_data_with_caching(input_postal_code, within_miles = "200"):
-  >> input_postal_code: the USA postal code
-  >> (optional) how many miles for the searching radius
-  >> a jSON format dictionary
-
-  Second function:
-  - What will it be called?
-  - What will its input be?
-  - What do you expect its return value to be?
-  >> def get_artist_songs_with_caching(input_artist, how_many_songs = "10"):
-  >> input_artist: the keyword you want to search
-  >> (option) how_many_songs: how many songs you want to have?
-  >> a jSON format dictionary
-
-You may always have more than 2, but you must describe at least 2 here with these pieces of information.
-
-
-- What file will you be creating?
-  - What information will be in the file? What type of file will it be? What will it look like?
-  - Briefly describe the process of creating the file from the program — what will you need to have completed in the program in order to successfully write the file you are planning to create?
-
-    >> 'cache_cache_cache.json': caching file
-    >> A CSV file: show the details of the songs and sorted by the release date
-
-- Describe in a sentence or two in what order you plan to tackle writing this code/working on this project. What comes first? Class definitions? Data investigation? What, approximately, is after that? What might come last? This doesn’t have to be exact, nor be exactly what you end up doing, but it should give you a good idea of where you’re going — and give us one, too.
-
->> I first look at into the example JSON data that API documentation websites provide and decide what parts of data I am interested in and then design the class structure. After finishing design the function to request the API data, I would take the parts I want in the API data and reorganized them in another form which would be more readable.
+  Run tests:
+  pytest tests/ -v

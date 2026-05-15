@@ -44,9 +44,13 @@ async def fetch_concerts(
     postal_code: str,
     radius: int = 50,
     limit: int = 5,
+    start_dt: str | None = None,
+    end_dt: str | None = None,
     client: httpx.AsyncClient | None = None,
 ) -> list[Concert]:
-    cache_key = f"tm:{postal_code}:{radius}:{limit}"
+    start_key = start_dt or "none"
+    end_key = end_dt or "none"
+    cache_key = f"tm:{postal_code}:{radius}:{limit}:{start_key}:{end_key}"
     if cached := await cache.get(cache_key, settings.cache_ttl_seconds):
         return [Concert(**c) for c in cached]
 
@@ -61,14 +65,18 @@ async def fetch_concerts(
 
         params = {
             "apikey": settings.ticketmaster_api_key,
-            "segmentId": "KZFzniwnSyZfZ7v7n1",  # Music (stable official ID)
+            "segmentId": "KZFzniwnSyZfZ7v7n1",
             "classificationName": "Music",
             "latlong": latlong,
             "radius": str(radius),
             "unit": "miles",
-            "size": str(limit * 3),  # fetch extra to survive filtering
+            "size": str(limit * 3),
             "sort": "date,asc",
         }
+        if start_dt:
+            params["startDateTime"] = start_dt
+        if end_dt:
+            params["endDateTime"] = end_dt
 
         resp = await client.get(_BASE, params=params)
         resp.raise_for_status()

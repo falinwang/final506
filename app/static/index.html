@@ -45,6 +45,20 @@
         <option value="100">100 mi</option>
         <option value="200">200 mi</option>
       </select>
+      <div id="presetGroup" class="flex gap-1">
+        <button type="button" data-days="7"
+          class="preset-btn rounded-xl border border-zinc-700 bg-zinc-800 px-3 py-3 text-sm transition hover:bg-zinc-700">
+          This Week
+        </button>
+        <button type="button" data-days="30"
+          class="preset-btn rounded-xl border border-zinc-700 bg-zinc-800 px-3 py-3 text-sm transition hover:bg-zinc-700">
+          This Month
+        </button>
+        <button type="button" data-days="90"
+          class="preset-btn rounded-xl border border-zinc-700 bg-violet-600 px-3 py-3 text-sm font-semibold transition hover:bg-violet-500">
+          Next 3 Months
+        </button>
+      </div>
       <button
         type="submit"
         class="rounded-xl bg-violet-600 hover:bg-violet-500 transition px-6 py-3 text-sm font-semibold"
@@ -74,6 +88,27 @@
     const loadingEl = document.getElementById('loading');
     const errorEl = document.getElementById('error');
     const resultsEl = document.getElementById('results');
+
+    let activePresetDays = 90;
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activePresetDays = parseInt(btn.dataset.days, 10);
+        document.querySelectorAll('.preset-btn').forEach(b => {
+          b.classList.remove('bg-violet-600', 'font-semibold', 'hover:bg-violet-500');
+          b.classList.add('bg-zinc-800', 'hover:bg-zinc-700');
+        });
+        btn.classList.remove('bg-zinc-800', 'hover:bg-zinc-700');
+        btn.classList.add('bg-violet-600', 'font-semibold', 'hover:bg-violet-500');
+      });
+    });
+
+    function isoDate(offsetDays) {
+      const d = new Date();
+      const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+      local.setUTCDate(local.getUTCDate() + offsetDays);
+      return local.toISOString().slice(0, 10);
+    }
 
     function setLoading(v) {
       loadingEl.classList.toggle('hidden', !v);
@@ -181,8 +216,17 @@
       const radius = document.getElementById('radius').value;
 
       try {
-        const res = await fetch(`/api/search?postal_code=${zip}&radius=${radius}&concerts_limit=3&tracks_limit=10`);
-        if (res.status === 404) throw new Error('No concerts found near this ZIP code. Try a larger radius.');
+        const startDate = isoDate(0);
+        const endDate = isoDate(activePresetDays);
+        const res = await fetch(
+          `/api/search?postal_code=${zip}&radius=${radius}&concerts_limit=3&tracks_limit=10&start_date=${startDate}&end_date=${endDate}`
+        );
+        if (res.status === 404) {
+          const hint = activePresetDays < 90
+            ? ' Try switching to Next 3 Months to see more upcoming events.'
+            : '';
+          throw new Error(`No concerts found near this ZIP code. Try a larger radius.${hint}`);
+        }
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
           throw new Error(data.detail || `Error ${res.status}`);
@@ -190,7 +234,10 @@
         const data = await res.json();
         setLoading(false);
         if (!data.length) {
-          showError('No concerts found near this ZIP code.');
+          const hint = activePresetDays < 90
+            ? ' Try switching to Next 3 Months to see more upcoming events.'
+            : '';
+          showError(`No concerts found near this ZIP code.${hint}`);
           return;
         }
         resultsEl.innerHTML = data.map(renderResult).join('');
