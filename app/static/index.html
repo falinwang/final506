@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Concert Finder</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .fade-in { animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    .spinner { animation: spin 0.9s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100">
+
+  <!-- Header -->
+  <header class="border-b border-zinc-800 px-6 py-4">
+    <div class="max-w-3xl mx-auto flex items-center gap-3">
+      <span class="text-2xl">🎵</span>
+      <div>
+        <h1 class="text-lg font-bold tracking-tight">Concert Finder</h1>
+        <p class="text-xs text-zinc-500">Powered by Ticketmaster &amp; iTunes</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Search -->
+  <main class="max-w-3xl mx-auto px-6 py-10">
+    <form id="searchForm" class="flex flex-col sm:flex-row gap-3 mb-10">
+      <input
+        id="postalCode"
+        type="text"
+        inputmode="numeric"
+        maxlength="5"
+        placeholder="Enter ZIP code (e.g. 48104)"
+        class="flex-1 rounded-xl bg-zinc-800 border border-zinc-700 px-4 py-3 text-sm placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-violet-500"
+        required
+      />
+      <select id="radius" class="rounded-xl bg-zinc-800 border border-zinc-700 px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
+        <option value="25">25 mi</option>
+        <option value="50" selected>50 mi</option>
+        <option value="100">100 mi</option>
+        <option value="200">200 mi</option>
+      </select>
+      <button
+        type="submit"
+        class="rounded-xl bg-violet-600 hover:bg-violet-500 transition px-6 py-3 text-sm font-semibold"
+      >
+        Search
+      </button>
+    </form>
+
+    <!-- State: loading -->
+    <div id="loading" class="hidden flex-col items-center gap-3 py-20 text-zinc-500">
+      <svg class="spinner w-8 h-8 text-violet-500" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+      </svg>
+      <p class="text-sm">Finding concerts &amp; songs…</p>
+    </div>
+
+    <!-- State: error -->
+    <div id="error" class="hidden rounded-xl bg-red-950 border border-red-800 px-5 py-4 text-sm text-red-300"></div>
+
+    <!-- Results -->
+    <div id="results" class="space-y-8"></div>
+  </main>
+
+  <script>
+    const form = document.getElementById('searchForm');
+    const loadingEl = document.getElementById('loading');
+    const errorEl = document.getElementById('error');
+    const resultsEl = document.getElementById('results');
+
+    function setLoading(v) {
+      loadingEl.classList.toggle('hidden', !v);
+      loadingEl.classList.toggle('flex', v);
+    }
+
+    function showError(msg) {
+      errorEl.textContent = msg;
+      errorEl.classList.remove('hidden');
+    }
+
+    function clearState() {
+      setLoading(false);
+      errorEl.classList.add('hidden');
+      resultsEl.innerHTML = '';
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr || dateStr === 'TBA') return 'TBA';
+      return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', {
+        weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
+      });
+    }
+
+    function formatTime(timeStr) {
+      if (!timeStr) return '';
+      const [h, m] = timeStr.split(':');
+      const d = new Date();
+      d.setHours(+h, +m);
+      return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    }
+
+    function renderTrackRow(track, i) {
+      return `
+        <tr class="border-t border-zinc-800 hover:bg-zinc-800/40 transition">
+          <td class="py-2 pr-4 text-zinc-500 text-xs tabular-nums w-6">${i + 1}</td>
+          <td class="py-2 pr-4">
+            <p class="text-sm font-medium">${esc(track.title)}</p>
+            <p class="text-xs text-zinc-500">${esc(track.album)}</p>
+          </td>
+          <td class="py-2 pr-4 text-xs text-zinc-400 whitespace-nowrap">${esc(track.length)}</td>
+          <td class="py-2 text-xs text-zinc-500 whitespace-nowrap">${track.release_date ? track.release_date.slice(0, 4) : ''}</td>
+        </tr>`;
+    }
+
+    function renderResult(item) {
+      const { concert, lineups } = item;
+      const timeLabel = concert.time ? ` · ${formatTime(concert.time)}` : '';
+      const artistStr = concert.artists.join(' & ');
+
+      const lineupHTML = lineups.map(lt => `
+        <div class="mt-5">
+          <p class="text-xs font-semibold uppercase tracking-widest text-zinc-500 mb-2">${esc(lt.artist)}</p>
+          <table class="w-full">
+            <tbody>
+              ${lt.tracks.map((t, i) => renderTrackRow(t, i)).join('')}
+            </tbody>
+          </table>
+        </div>
+      `).join('');
+
+      return `
+        <div class="fade-in rounded-2xl bg-zinc-900 border border-zinc-800 overflow-hidden">
+          <div class="px-6 py-5 border-b border-zinc-800">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h2 class="font-semibold text-base leading-snug">${esc(concert.event_name)}</h2>
+                <p class="text-sm text-violet-400 mt-0.5">${esc(artistStr)}</p>
+              </div>
+              <a
+                href="${esc(concert.url)}"
+                target="_blank"
+                rel="noopener"
+                class="shrink-0 rounded-lg bg-violet-600 hover:bg-violet-500 transition px-4 py-2 text-xs font-semibold"
+              >
+                Tickets →
+              </a>
+            </div>
+            <p class="text-xs text-zinc-500 mt-3">
+              📅 ${formatDate(concert.date)}${timeLabel}
+            </p>
+          </div>
+          <div class="px-6 py-4">
+            <p class="text-xs font-semibold uppercase tracking-widest text-zinc-600 mb-1">Top Songs</p>
+            ${lineupHTML || '<p class="text-xs text-zinc-600 mt-3">No song data available.</p>'}
+          </div>
+        </div>
+      `;
+    }
+
+    function esc(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearState();
+      setLoading(true);
+
+      const zip = document.getElementById('postalCode').value.trim();
+      const radius = document.getElementById('radius').value;
+
+      try {
+        const res = await fetch(`/api/search?postal_code=${zip}&radius=${radius}&concerts_limit=3&tracks_limit=10`);
+        if (res.status === 404) throw new Error('No concerts found near this ZIP code. Try a larger radius.');
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.detail || `Error ${res.status}`);
+        }
+        const data = await res.json();
+        setLoading(false);
+        if (!data.length) {
+          showError('No concerts found near this ZIP code.');
+          return;
+        }
+        resultsEl.innerHTML = data.map(renderResult).join('');
+      } catch (err) {
+        setLoading(false);
+        showError(err.message);
+      }
+    });
+  </script>
+</body>
+</html>
