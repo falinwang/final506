@@ -32,6 +32,7 @@ async def fetch_concerts(
         "apikey": settings.ticketmaster_api_key,
         "classificationName": "music",
         "postalCode": postal_code,
+        "countryCode": "US",
         "radius": str(radius),
         "unit": "miles",
         "size": str(limit),

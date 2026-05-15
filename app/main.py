@@ -65,38 +65,6 @@ async def search(
     return results
 
 
-@app.get("/api/debug/ticketmaster")
-async def debug_ticketmaster():
-    import httpx
-    from app.config import settings
-
-    base = "https://app.ticketmaster.com/discovery/v2/events"
-    key = settings.ticketmaster_api_key
-
-    async with httpx.AsyncClient(timeout=10) as client:
-        # No location — just "are there ANY events?"
-        r_global = await client.get(base, params={"apikey": key, "size": "1"})
-        # Keyword search instead of postal code
-        r_keyword = await client.get(base, params={"apikey": key, "keyword": "concert", "size": "1"})
-        # City name instead of postal code
-        r_city = await client.get(base, params={"apikey": key, "city": "Los Angeles", "size": "1"})
-
-    def summary(r: httpx.Response) -> dict:
-        body = r.json()
-        total = body.get("page", {}).get("totalElements", "n/a")
-        first = None
-        events = body.get("_embedded", {}).get("events", [])
-        if events:
-            first = events[0].get("name")
-        return {"status": r.status_code, "total": total, "first_event": first}
-
-    return {
-        "key_used": f"{key[:6]}...{key[-4:]}",
-        "global_no_filter": summary(r_global),
-        "keyword_concert":  summary(r_keyword),
-        "city_los_angeles": summary(r_city),
-    }
-
 
 @app.get("/api/health")
 async def health():
