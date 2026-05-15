@@ -31,6 +31,14 @@ async def search(
     start_date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
     end_date: str | None = Query(None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
 ):
+    try:
+        if start_date:
+            _date.fromisoformat(start_date)
+        if end_date:
+            _date.fromisoformat(end_date)
+    except ValueError as exc:
+        raise HTTPException(422, str(exc))
+
     resolved_start = start_date or _date.today().isoformat()
     if end_date and end_date < resolved_start:
         raise HTTPException(422, "end_date must not be before start_date")

@@ -66,3 +66,20 @@ def test_search_returns_results_with_date_params():
     data = resp.json()
     assert len(data) == 1
     assert data[0]["concert"]["event_name"] == "Test Show"
+
+
+def test_search_accepts_same_start_and_end_date():
+    p1, p2 = _patch_services()
+    with p1, p2:
+        resp = client.get("/api/search?postal_code=48104&start_date=2026-06-01&end_date=2026-06-01")
+    assert resp.status_code == 200
+
+
+def test_search_returns_422_when_end_date_is_past_and_start_omitted():
+    resp = client.get("/api/search?postal_code=48104&end_date=2000-01-01")
+    assert resp.status_code == 422
+
+
+def test_search_returns_422_for_calendar_invalid_date():
+    resp = client.get("/api/search?postal_code=48104&start_date=2026-02-30")
+    assert resp.status_code == 422
