@@ -65,42 +65,6 @@ async def search(
     return results
 
 
-
-@app.get("/api/debug/ticketmaster")
-async def debug_ticketmaster(postal_code: str = Query("90020")):
-    import httpx
-    from app.config import settings
-
-    from app.services.ticketmaster import _zip_to_latlong
-
-    async with httpx.AsyncClient(timeout=10) as client:
-        latlong = await _zip_to_latlong(postal_code, client)
-        if not latlong:
-            return {"error": "ZIP not found", "postal_code": postal_code}
-
-        params = {
-            "apikey": settings.ticketmaster_api_key,
-            "segmentId": "KZFzniwnSyZfZ7v7n1",
-            "latlong": latlong,
-            "radius": "50",
-            "unit": "miles",
-            "size": "3",
-            "sort": "date,asc",
-        }
-        resp = await client.get(
-            "https://app.ticketmaster.com/discovery/v2/events", params=params
-        )
-    body = resp.json()
-    return {
-        "latlong": latlong,
-        "params_sent": {k: v for k, v in params.items() if k != "apikey"},
-        "key_prefix": settings.ticketmaster_api_key[:6],
-        "status": resp.status_code,
-        "total": body.get("page", {}).get("totalElements"),
-        "first_event": (body.get("_embedded", {}).get("events") or [{}])[0].get("name"),
-    }
-
-
 @app.get("/api/health")
 async def health():
     return {"status": "ok"}

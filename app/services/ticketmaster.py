@@ -60,10 +60,11 @@ async def fetch_concerts(
         params = {
             "apikey": settings.ticketmaster_api_key,
             "segmentId": "KZFzniwnSyZfZ7v7n1",  # Music (stable official ID)
+            "classificationName": "Music",
             "latlong": latlong,
             "radius": str(radius),
             "unit": "miles",
-            "size": str(limit),
+            "size": str(limit * 3),  # fetch extra to survive filtering
             "sort": "date,asc",
         }
 
@@ -74,7 +75,13 @@ async def fetch_concerts(
         if owned:
             await client.aclose()
 
+    _NON_MUSIC_KEYWORDS = {"tour", "guided", "ceremony", "graduation", "exhibition", "comedy"}
+
     events = data.get("_embedded", {}).get("events", [])
-    concerts = [_parse(e) for e in events]
+    concerts = [
+        c for e in events
+        if not any(kw in e.get("name", "").lower() for kw in _NON_MUSIC_KEYWORDS)
+        if (c := _parse(e))
+    ][:limit]
     await cache.set(cache_key, [c.model_dump() for c in concerts])
     return concerts

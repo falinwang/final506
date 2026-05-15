@@ -5,6 +5,13 @@ from app.models import ArtistTracks, Track
 
 _BASE = "https://itunes.apple.com/search"
 
+_MUSIC_GENRES = {
+    "pop", "rock", "hip-hop/rap", "r&b/soul", "electronic", "dance",
+    "alternative", "indie", "country", "jazz", "classical", "metal",
+    "punk", "blues", "folk", "latin", "reggae", "soul", "funk",
+    "singer/songwriter", "hip hop", "k-pop", "j-pop",
+}
+
 
 def _ms_to_mmss(ms: int) -> str:
     total = ms // 1000
@@ -13,6 +20,9 @@ def _ms_to_mmss(ms: int) -> str:
 
 def _parse_track(raw: dict) -> Track | None:
     if "trackName" not in raw or "trackTimeMillis" not in raw:
+        return None
+    genre = raw.get("primaryGenreName", "").lower()
+    if genre and genre not in _MUSIC_GENRES:
         return None
     return Track(
         artist=raw.get("artistName", ""),
