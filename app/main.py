@@ -65,6 +65,30 @@ async def search(
     return results
 
 
+@app.get("/api/debug/ticketmaster")
+async def debug_ticketmaster(
+    postal_code: str = Query("90020"),
+    radius: int = Query(50),
+):
+    import httpx
+    from app.config import settings
+
+    params = {
+        "apikey": settings.ticketmaster_api_key,
+        "classificationName": "music",
+        "postalCode": postal_code,
+        "radius": str(radius),
+        "unit": "miles",
+        "size": "3",
+        "sort": "date,asc",
+    }
+    async with httpx.AsyncClient(timeout=10) as client:
+        resp = await client.get(
+            "https://app.ticketmaster.com/discovery/v2/events", params=params
+        )
+    return {"status": resp.status_code, "body": resp.json()}
+
+
 @app.get("/api/health")
 async def health():
     return {"status": "ok"}
