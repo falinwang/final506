@@ -99,7 +99,7 @@ except:
     CACHE_DICTION = {}
 
 # my API key
-TICKETMASTER_API_KEY = "ANXpHUscAoL1olptTu6QJlhNmiCQ0BQD" # 5000 requests every 1 day
+TICKETMASTER_API_KEY = "REVOKED_SEE_ENV_FILE"  # key was exposed in git; rotate at developer.ticketmaster.com
 
 # My function to get event data with Ticketmaster API
 # Input: postal code and the miles
