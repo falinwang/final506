@@ -221,7 +221,12 @@
         const res = await fetch(
           `/api/search?postal_code=${zip}&radius=${radius}&concerts_limit=3&tracks_limit=10&start_date=${startDate}&end_date=${endDate}`
         );
-        if (res.status === 404) throw new Error('No concerts found near this ZIP code. Try a larger radius.');
+        if (res.status === 404) {
+          const hint = activePresetDays < 90
+            ? ' Try switching to Next 3 Months to see more upcoming events.'
+            : '';
+          throw new Error(`No concerts found near this ZIP code. Try a larger radius.${hint}`);
+        }
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
           throw new Error(data.detail || `Error ${res.status}`);
@@ -229,7 +234,10 @@
         const data = await res.json();
         setLoading(false);
         if (!data.length) {
-          showError('No concerts found near this ZIP code.');
+          const hint = activePresetDays < 90
+            ? ' Try switching to Next 3 Months to see more upcoming events.'
+            : '';
+          showError(`No concerts found near this ZIP code.${hint}`);
           return;
         }
         resultsEl.innerHTML = data.map(renderResult).join('');
